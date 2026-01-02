@@ -13,6 +13,7 @@ def main():
     base_link_for_countries = "https://newsroom.churchofjesuschrist.org/facts-and-statistics"
     country_links = get_links(base_link_for_countries)
     dict_data = [get_data(link) for link in country_links]
+    dict_data = [d for d in dict_data if d is not None]  # Filter out None values from failed scrapes
     country_data = pd.DataFrame(dict_data)
 
     # State-Level Data: LDS.ORG
@@ -20,6 +21,7 @@ def main():
     state_links = get_links(base_link_for_states)
     state_links = [lnk for lnk in state_links if lnk not in country_links]
     dict_data = [get_data(link) for link in state_links]
+    dict_data = [d for d in dict_data if d is not None]  # Filter out None values from failed scrapes
     state_data = pd.DataFrame(dict_data)
 
     # # Temple Data: LDS.ORG
@@ -31,9 +33,17 @@ def main():
     temple_data = pd.json_normalize(data, ['props','pageProps','templeList'])
 
     current_date = date.today()
+    
+    print(f"\nScraping complete!")
+    print(f"Country records: {len(country_data)}")
+    print(f"State records: {len(state_data)}")
+    print(f"Temple records: {len(temple_data)}")
+    
     country_data.to_csv(f"./data/country-{str(current_date)}.csv", index = False)
     state_data.to_csv(f"./data/state-{str(current_date)}.csv", index = False)
     temple_data.to_csv(f"./data/temple-{str(current_date)}.csv", index = False)
+    
+    print(f"\nFiles saved to ./data/ directory")
     
     # Temple Dimension Data: https://churchofjesuschristtemples.org
     # + https://church-of-jesus-christ-facts.net
